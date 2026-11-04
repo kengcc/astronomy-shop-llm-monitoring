@@ -1,7 +1,28 @@
-# Astronomy Shop LLM Monitoring Lab
+# LLM Observability Evaluation Lab (Astronomy Shop)
 
-Apple Silicon local observability lab based on the official
+This repository is a local test environment for **evaluating and comparing LLM
+observability platforms**, based on the official
 [OpenTelemetry Astronomy Shop](https://github.com/open-telemetry/opentelemetry-demo).
+It runs on an Apple Silicon Mac with Docker Desktop and provides a repeatable
+agent workload for hands-on technical evaluation.
+
+## Evaluation purpose
+
+Run the same sample questions and controlled failure scenarios across platforms
+to assess:
+
+- Visibility into agent workflows, model calls and tool execution.
+- Prompt and response capture, trace hierarchy and correlation.
+- How easily engineers can identify slow steps, errors and their causes.
+- Setup effort, usability and controls for telemetry volume and retention.
+
+Datadog Agent Observability and Grafana Cloud Agent Observability have been
+verified end to end with this demo. A New Relic configuration template is
+included for a subsequent evaluation; that connection has not been tested here.
+
+The default agent uses recorded LLM responses. This supports evaluation of
+tracing and troubleshooting workflows; live inference performance, actual model
+costs and answer quality require a live model and separate tests.
 
 ## Run locally
 
