@@ -1,0 +1,15 @@
+services:
+  otel-collector:
+    environment:
+      GODEBUG: http2client=0
+    env_file:
+      - .grafana-secrets.env
+    volumes:
+      - ./local-lab/cloud-templates/grafana-agent-traces.yaml:/etc/otelcol-config-grafana-agent.yml:ro
+    command: !override
+      - --config=/etc/otelcol-config.yml
+      - --config=/etc/otelcol-config-full.yml
+      - --config=/etc/otelcol-config-observability.yml
+      - --config=/etc/otelcol-config-extras.yml
+      - --config=/etc/otelcol-config-grafana-agent.yml
+      - --feature-gates=service.profilesSupport

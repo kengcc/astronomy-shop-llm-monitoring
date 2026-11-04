@@ -1,0 +1,71 @@
+DATADOG AGENT OBSERVABILITY — OPTIONAL CLOUD CONNECTION
+
+Account site: US1 (app.datadoghq.com). User confirmed Agent Observability Free.
+API key validated successfully. Its value is stored only in .cloud-secrets.env,
+which has owner-only permissions and is excluded from Git. Never share it.
+
+The Collector reports successful sends to Datadog for the agent-only trace route.
+The user also confirmed regular demo traces visible in Datadog.
+This saved connection is enabled only when its switching command is used.
+All three recorded-agent prompts returned HTTP 200 during connection testing.
+Cloud application and service: astronomy-shop-lab. Local service: agent.
+The cloud route sets dd_llmobs_enabled=true on resources and spans, with
+DD_SITE=datadoghq.com and DD_LLMOBS_ML_APP=astronomy-shop-lab.
+Local Jaeger remains enabled.
+General shop metrics and logs are not exported to Datadog by this route.
+Datadog can represent ingested GenAI spans in corresponding APM traces too;
+this route does not activate broader infrastructure or full-stack collection.
+The automatic load generator is stopped to keep tests under manual control.
+
+OPEN AND TEST
+1. In Datadog, choose AI Observability > Agent Observability > Traces
+   (the product may still be labelled LLM Observability).
+2. Set the time range to Past 15 minutes and refresh.
+3. Look for app astronomy-shop-lab; try the filter ml_app:astronomy-shop-lab.
+   If needed clear filters and look for service agent.
+4. Open http://localhost:8080/chatbot/ and click one of its three sample buttons.
+5. Refresh Datadog and open the new trace. Inspect the workflow, model steps,
+   tool calls, durations and available prompt/response content.
+
+The agent replays recorded model responses. Token usage/cost fields may be
+missing. This setup does not evaluate live inference cost or model quality.
+
+CONTROLLED FOLLOW-UP TESTS
+Slow model: open http://localhost:8080/feature/ and set aiSlowResponse to 5sec.
+Run one sample question; each model step should gain approximately five seconds.
+Inspect the delay in Datadog, then restore aiSlowResponse to off.
+
+Error: ask "what's best seller products here?". This has no supported recording.
+The chatbot shows recovery guidance; inspect the failed agent/model request in
+Datadog. Then click a supported sample question to verify recovery.
+
+RUN AND STOP
+From the installation folder, while Datadog export should remain enabled:
+  ./datadog.sh up -d --pull never --no-build otel-collector
+  ./datadog.sh start agent chatbot
+  ./datadog.sh stop load-generator
+Do not run datadog.sh up for the whole stack unless you intend to start the
+load generator too. Avoid lab.sh up for the Collector while cloud export is
+wanted; it uses only the local configuration and replaces the cloud route.
+
+Disconnect Datadog while retaining local observability:
+  ./lab.sh up -d --no-deps --pull never --no-build otel-collector
+  ./lab.sh restart agent
+
+Stop the entire demo:
+  ./datadog.sh stop
+
+Cloud config: compose.datadog.yaml and
+local-lab/cloud-templates/datadog-agent-traces.yaml.
+The earlier generic cloud-templates/datadog.yaml remains inactive; it exports
+broader data and is not the route used for this initial LLM-only test.
+
+Official reference:
+https://docs.datadoghq.com/llm_observability/instrument/otel_instrumentation/
+
+FIRST-TRACE SETUP SCREEN
+If Datadog displays Submit your first trace, enter astronomy-shop-lab as the
+application name, select the existing astronomy-shop-local API key and complete
+Continue Setup. Then open Traces, select All Applications and Past 1 Hour, clear
+filters and refresh. Check both astronomy-shop-lab and agent if grouping differs.
+Successful Collector sends confirm intake delivery, not UI indexing.

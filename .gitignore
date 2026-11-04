@@ -63,3 +63,5 @@ src/shipping/target/
 /.cloud-secrets.env*
 /local-lab/*.json
 /local-lab/chat-ui-result.txt
+
+/.grafana-secrets.env*

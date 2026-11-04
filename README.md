@@ -17,16 +17,53 @@ Open [the shop](http://localhost:8080/), [chatbot](http://localhost:8080/chatbot
 [Grafana dashboards](http://localhost:8080/grafana/).
 Stop with `./lab.sh stop`; resume with `./lab.sh start`.
 
-The agent uses **recorded responses**, with no live AI model or paid API key.
+The agent uses **recorded responses**, with no live AI model or paid model API key.
 Click one of the three sample questions in the chatbot. Free-form questions
 show guidance to use the supported samples. Each request runs independently.
 All published ports bind to localhost. Product catalog has a 128 MB memory limit.
 
 See [the setup and cloud connection guide](local-lab/Astronomy-Shop-Guide.txt),
 [verification results](local-lab/Verification.txt), and
-[inactive cloud templates](local-lab/cloud-templates/).
-Datadog, New Relic and Grafana Cloud are not connected. Enable cloud ingestion
-only after approving its account and costs. Keep real credentials out of Git.
+[cloud configuration templates](local-lab/cloud-templates/).
+New clones start with local-only telemetry. Datadog and Grafana Cloud routes
+have been tested end to end; they require your own account and credentials.
+
+## Optional cloud agent tracing
+
+Choose one cloud route at a time. These routes export only agent traces and
+retain local Jaeger. They do not export general shop logs or metrics to the cloud.
+
+For Datadog US1, copy the credential example and fill it locally:
+
+```sh
+cp local-lab/cloud-templates/datadog-agent-secrets.env.example .cloud-secrets.env
+chmod 600 .cloud-secrets.env
+# Enter your API key in the local file before continuing.
+./datadog.sh up -d --no-deps --pull never --no-build otel-collector
+./datadog.sh restart agent
+```
+
+For Grafana Cloud, use the OTLP endpoint, OTLP instance ID and a Cloud Access
+Policy Token with `traces:write` permission:
+
+```sh
+cp local-lab/cloud-templates/grafana-agent-secrets.env.example .grafana-secrets.env
+chmod 600 .grafana-secrets.env
+# Enter your connection details in the local file before continuing.
+./grafana.sh up -d --no-deps --pull never --no-build otel-collector
+./grafana.sh restart agent
+```
+
+Copy examples only when creating a new credential file; do not overwrite saved
+credentials. Both real credential filenames are excluded from Git. Confirm your
+account plan and ingestion allowance before enabling either cloud route.
+
+For controlled tests, stop automatic traffic with `./lab.sh stop load-generator`,
+then click the chatbot's three sample questions. See the
+[Datadog guide](local-lab/Datadog-Getting-Started.txt) and
+[Grafana guide](local-lab/Grafana-Getting-Started.txt) for UI setup, required
+LLM conversion attributes, latency/error tests and connection-switching commands.
+New Relic remains an inactive template.
 
 The original upstream source, license and history are retained below.
 

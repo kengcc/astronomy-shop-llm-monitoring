@@ -1,0 +1,42 @@
+# Enabled only through compose.datadog.yaml and datadog.sh.
+processors:
+  filter/datadog_agent_only:
+    error_mode: propagate
+    traces:
+      span:
+        - 'resource.attributes["service.name"] != "agent"'
+  resource/datadog_app:
+    attributes:
+      - key: service.name
+        value: ${env:DD_LLMOBS_ML_APP}
+        action: upsert
+      - key: dd_llmobs_enabled
+        value: true
+        action: upsert
+  transform/datadog_llmobs:
+    error_mode: propagate
+    trace_statements:
+      - context: span
+        statements:
+          - set(attributes["dd_llmobs_enabled"], true)
+  batch/datadog_agent:
+    timeout: 2s
+    send_batch_size: 128
+    send_batch_max_size: 128
+exporters:
+  otlp_http/datadog_agent:
+    traces_endpoint: https://otlp.datadoghq.com/v1/traces
+    headers:
+      dd-api-key: ${env:DD_API_KEY}
+      dd-otlp-source: llmobs
+      dd-ml-app: ${env:DD_LLMOBS_ML_APP}
+    compression: gzip
+    timeout: 15s
+    sending_queue:
+      queue_size: 20
+service:
+  pipelines:
+    traces/datadog_agent:
+      receivers: [otlp]
+      processors: [filter/datadog_agent_only, resource_detection, memory_limiter, transform/sanitize_spans, gen_ai_normalizer, transform/redact_sensitive_data, redaction, resource/datadog_app, transform/datadog_llmobs, batch/datadog_agent]
+      exporters: [otlp_http/datadog_agent]

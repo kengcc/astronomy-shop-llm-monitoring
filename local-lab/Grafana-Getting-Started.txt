@@ -1,0 +1,79 @@
+GRAFANA CLOUD AGENT OBSERVABILITY — LOCAL LAB
+
+Cloud stack: https://heartybanana3261.grafana.net
+User confirmed the Free plan. The connection uses the existing OpenTelemetry
+Collector and sends only the agent service's spans to Grafana Cloud.
+The Grafana route sets agento11y.record=true and agent name astronomy-shop-lab.
+Local Jaeger, Grafana dashboards, logs and metrics remain available.
+The Datadog cloud route is not active in this configuration; its saved files
+remain available. The automatic load generator remains stopped.
+
+VIEW THE TEST DATA
+1. Open your Grafana Cloud stack.
+2. Select Observability > Agent > Conversations (or Agent Observability).
+3. Set Past 1 Hour, clear filters and refresh.
+4. Look for astronomy-shop-lab and open a conversation. Inspect its prompt,
+   response, model steps and linked trace. Without an explicit conversation ID,
+   Grafana groups compatible spans by trace into separate conversations.
+5. Click a sample question at http://localhost:8080/chatbot/ to create more data.
+
+The agent uses recorded model responses, not live inference. Missing token
+counts or estimated model costs are expected and must not be treated as real
+usage or proof of zero production cost. Tool spans are context; Grafana does
+not create standalone generations for tool operations.
+
+CONTROLS
+Run these commands from the installation folder.
+
+Enable Grafana export or recreate only its Collector:
+  ./grafana.sh up -d --no-deps --pull never --no-build otel-collector
+  ./grafana.sh restart agent
+
+Switch back to the saved Datadog route:
+  ./datadog.sh up -d --no-deps --pull never --no-build otel-collector
+  ./datadog.sh restart agent
+
+Return to local-only telemetry:
+  ./lab.sh up -d --no-deps --pull never --no-build otel-collector
+  ./lab.sh restart agent
+
+Stop all demo containers:
+  ./grafana.sh stop
+
+Avoid running up for the whole stack during controlled testing: it starts the
+automatic load generator too. Keep it stopped:
+  ./grafana.sh stop load-generator
+
+TEST SCENARIOS
+Baseline: use the same three sample questions used for Datadog.
+Slow model: http://localhost:8080/feature/ > aiSlowResponse > 5sec. Run one
+sample, identify slower model steps, then restore the flag to off.
+Unsupported prompt: ask "what's best seller products here?". The agent fails
+because no recording is available. Check how clearly Grafana surfaces the
+failure; the chatbot displays recovery guidance. A supported sample should
+work afterward. Operation filtering can affect where failed generations appear.
+
+CREDENTIALS
+.grafana-secrets.env has owner-only permissions and is excluded from Git.
+Never share its contents or screenshots of visible tokens. Revoke any token
+exposed in a screenshot and save its replacement in that local file. After
+changing credentials, recreate the Collector with the Grafana command above.
+Use the OTLP instance ID and endpoint from the OpenTelemetry connection tile.
+Agent Observability SDK instance IDs are not interchangeable by assumption.
+
+VERIFICATION
+See grafana-test-results.json for sample request status and export counters.
+Successful sends establish intake acceptance. Verify conversation visibility
+in the Cloud UI before calling the end-to-end setup complete.
+
+REFERENCES
+https://grafana.com/docs/grafana-cloud/observe-and-act/agent-observability/get-started/opentelemetry/
+https://grafana.com/docs/grafana-cloud/observe-and-act/agent-observability/get-started/grafana-cloud/
+
+CONNECTION VALIDATION
+Grafana intake authentication returned HTTP 200. Three sample prompts passed.
+Direct Collector metrics confirmed 45 spans sent, zero failed sends and an empty
+queue. HTTP/1.1 is enabled for Collector HTTP clients in compose.grafana.yaml.
+A direct metrics endpoint on port 8888 is available inside the Docker network;
+it is not published as a Mac host port. The user confirmed astronomy-shop-lab conversations are visible in Grafana.
+End-to-end delivery is verified.

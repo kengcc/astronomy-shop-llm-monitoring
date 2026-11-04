@@ -1,0 +1,16 @@
+services:
+  otel-collector:
+    environment:
+      DD_SITE: datadoghq.com
+      DD_LLMOBS_ML_APP: astronomy-shop-lab
+    env_file:
+      - .cloud-secrets.env
+    volumes:
+      - ./local-lab/cloud-templates/datadog-agent-traces.yaml:/etc/otelcol-config-datadog-agent.yml:ro
+    command: !override
+      - --config=/etc/otelcol-config.yml
+      - --config=/etc/otelcol-config-full.yml
+      - --config=/etc/otelcol-config-observability.yml
+      - --config=/etc/otelcol-config-extras.yml
+      - --config=/etc/otelcol-config-datadog-agent.yml
+      - --feature-gates=service.profilesSupport
