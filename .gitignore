@@ -58,3 +58,8 @@ src/frontend/cypress/screenshots
 src/shipping/target/
 
 !src/currency/build
+
+# Local monitoring lab: credentials and machine-specific runtime captures
+/.cloud-secrets.env*
+/local-lab/*.json
+/local-lab/chat-ui-result.txt

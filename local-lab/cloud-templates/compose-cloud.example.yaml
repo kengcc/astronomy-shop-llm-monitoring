@@ -1,0 +1,7 @@
+# INACTIVE example. Enable only after approving cloud use and costs.
+# Add this env_file entry to the existing services.otel-collector entry
+# in compose.local.yaml. Do not replace the other local settings.
+services:
+  otel-collector:
+    env_file:
+      - .cloud-secrets.env

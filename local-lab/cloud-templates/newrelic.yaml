@@ -1,0 +1,14 @@
+# INACTIVE TEMPLATE. Enable only after approving cloud ingestion and its costs.
+exporters:
+  otlp_http/newrelic:
+    endpoint: ${env:NEW_RELIC_OTLP_ENDPOINT}
+    headers:
+      api-key: ${env:NEW_RELIC_LICENSE_KEY}
+service:
+  pipelines:
+    traces:
+      exporters: [debug, otlp_grpc/jaeger, span_metrics, otlp_http/newrelic]
+    metrics:
+      exporters: [debug, otlp_http/prometheus, otlp_http/newrelic]
+    logs:
+      exporters: [debug, opensearch, otlp_http/newrelic]

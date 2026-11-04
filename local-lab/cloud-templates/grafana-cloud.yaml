@@ -1,0 +1,14 @@
+# INACTIVE TEMPLATE. Enable only after approving cloud ingestion and its costs.
+exporters:
+  otlp_http/grafana_cloud:
+    endpoint: ${env:GRAFANA_OTLP_ENDPOINT}
+    headers:
+      Authorization: ${env:GRAFANA_OTLP_AUTHORIZATION}
+service:
+  pipelines:
+    traces:
+      exporters: [debug, otlp_grpc/jaeger, span_metrics, otlp_http/grafana_cloud]
+    metrics:
+      exporters: [debug, otlp_http/prometheus, otlp_http/grafana_cloud]
+    logs:
+      exporters: [debug, opensearch, otlp_http/grafana_cloud]

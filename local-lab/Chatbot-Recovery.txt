@@ -1,0 +1,13 @@
+Chatbot recorded-mode clarification
+
+The user question "what's best seller products here?" has no supported recorded
+answer. The page now explains its recorded-demo mode and replaces an agent
+HTTP error with instructions to use the three sample questions. Each request
+uses fresh agent history in this mode. No live model is installed or connected.
+
+Verified in Chromium through the chatbot UI:
+- The exact unsupported question displays recovery guidance without HTTP 500 text.
+- A supported currency question immediately afterward returns an answer with USD.
+- The recorded-demo notice is visible.
+
+User chose to retain the recorded demo with three sample questions.

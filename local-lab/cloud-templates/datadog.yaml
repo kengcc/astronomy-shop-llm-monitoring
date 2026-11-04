@@ -1,0 +1,19 @@
+# INACTIVE TEMPLATE. Enable only after approving cloud ingestion and its costs.
+connectors:
+  datadog/connector: {}
+exporters:
+  datadog/cloud:
+    api:
+      site: ${env:DD_SITE}
+      key: ${env:DD_API_KEY}
+service:
+  pipelines:
+    traces:
+      exporters: [debug, otlp_grpc/jaeger, span_metrics, datadog/cloud, datadog/connector]
+    metrics:
+      exporters: [debug, otlp_http/prometheus, datadog/cloud]
+    logs:
+      exporters: [debug, opensearch, datadog/cloud]
+    metrics/datadog_apm:
+      receivers: [datadog/connector]
+      exporters: [datadog/cloud]

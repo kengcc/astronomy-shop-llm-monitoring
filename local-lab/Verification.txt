@@ -1,0 +1,56 @@
+INSTALLATION VERIFICATION — 2026-11-04T07:45:35.604709+08:00
+Repository: https://github.com/open-telemetry/opentelemetry-demo.git
+Source commit: e9e50d1ba21f3b582e61d86f720f658d5dc4b46e
+
+PASS: 31 of 31 services running.
+PASS: All 31 required container images are linux/arm64.
+PASS: No current containers recorded as killed for out-of-memory.
+An initial product-catalog container exceeded its upstream 20 MB limit. The
+local limit was raised to 128 MB and the service recreated successfully.
+PASS: All published ports are bound only to 127.0.0.1.
+PASS: Shop, chatbot, Jaeger and Grafana rendered in Chromium with HTTP 200.
+PASS: All three supported recorded-agent prompts returned HTTP 200 and answers.
+PASS: Jaeger API v3 returned 5 traces with 99 spans;
+agent operations include workflow, model and tool calls.
+PASS: All three inactive cloud templates validated with Collector 0.160.0 using
+dummy credentials. No vendor account authentication or cloud ingestion tested.
+
+Jaeger v3 API: /jaeger/ui/api/v3/services and /jaeger/ui/api/v3/traces
+Trace queries require query.start_time_min and query.start_time_max in RFC3339.
+
+Measured container memory snapshot:
+product-catalog 44.9MiB / 128MiB
+frontend-proxy 51.13MiB / 90MiB
+chatbot 161MiB / 500MiB
+load-generator 1.207GiB / 1.465GiB
+agent 221.8MiB / 500MiB
+mcp 141.3MiB / 500MiB
+frontend 124MiB / 250MiB
+checkout 19.18MiB / 20MiB
+recommendation 187.6MiB / 500MiB
+ad 224.2MiB / 300MiB
+currency 12.21MiB / 20MiB
+flagd-ui 121.4MiB / 200MiB
+quote 9.516MiB / 40MiB
+image-provider 9.707MiB / 120MiB
+accounting 130.8MiB / 160MiB
+shipping 8.938MiB / 20MiB
+cart 97.78MiB / 160MiB
+payment 46MiB / 140MiB
+fraud-detection 240.4MiB / 300MiB
+email 73.48MiB / 100MiB
+otel-collector 213MiB / 400MiB
+jaeger 134.9MiB / 1.172GiB
+grafana 360.9MiB / 500MiB
+flagd 74.44MiB / 75MiB
+astronomy-db 73.64MiB / 80MiB
+prometheus 114.2MiB / 200MiB
+kafka 569.9MiB / 620MiB
+opamp-server 21.39MiB / 65MiB
+telemetry-docs 9.957MiB / 100MiB
+opensearch 850.5MiB / 1GiB
+valkey-cart 3.551MiB / 20MiB
+
+All services are left running. Use ./lab.sh stop in the installation folder
+to stop them. The load generator generates continuous local demo traffic.
+See installation-inventory.json for exact loaded image IDs and service states.

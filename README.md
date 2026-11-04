@@ -1,3 +1,37 @@
+# Astronomy Shop LLM Monitoring Lab
+
+Apple Silicon local observability lab based on the official
+[OpenTelemetry Astronomy Shop](https://github.com/open-telemetry/opentelemetry-demo).
+
+## Run locally
+
+Start Docker Desktop, then run from this folder:
+
+```sh
+./lab.sh pull
+./lab.sh up -d --pull never --no-build
+```
+
+Open [the shop](http://localhost:8080/), [chatbot](http://localhost:8080/chatbot/),
+[Jaeger traces](http://localhost:8080/jaeger/ui/), or
+[Grafana dashboards](http://localhost:8080/grafana/).
+Stop with `./lab.sh stop`; resume with `./lab.sh start`.
+
+The agent uses **recorded responses**, with no live AI model or paid API key.
+Click one of the three sample questions in the chatbot. Free-form questions
+show guidance to use the supported samples. Each request runs independently.
+All published ports bind to localhost. Product catalog has a 128 MB memory limit.
+
+See [the setup and cloud connection guide](local-lab/Astronomy-Shop-Guide.txt),
+[verification results](local-lab/Verification.txt), and
+[inactive cloud templates](local-lab/cloud-templates/).
+Datadog, New Relic and Grafana Cloud are not connected. Enable cloud ingestion
+only after approving its account and costs. Keep real credentials out of Git.
+
+The original upstream source, license and history are retained below.
+
+---
+
 <!-- markdownlint-disable-next-line -->
 # <img src="https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png" alt="OTel logo" width="45"> OpenTelemetry Demo
 

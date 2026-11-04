@@ -1,0 +1,136 @@
+services:
+  accounting:
+    restart: "no"
+  ad:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 9555, "protocol": "tcp", "host_ip": "127.0.0.1"}
+      - {"mode": "ingress", "target": 9465, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  agent:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8010, "protocol": "tcp", "host_ip": "127.0.0.1"}
+    environment:
+      USE_VCR: "True"
+      LLM_MODEL: "claude-opus-4-7"
+      LLM_BASE_URL: "http://127.0.0.1:9/v1"
+      API_KEY: "sk-local-demo-not-real"
+      OPENAI_API_KEY: "sk-local-demo-not-real"
+  astronomy-db:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 5432, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  cart:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 7070, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  chatbot:
+    environment:
+      LAB_REPLAY_MODE: "true"
+    volumes:
+      - ./local-lab/chat_interface.py:/app/src/chat_interface/chat_interface.py:ro
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 7860, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  checkout:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 5050, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  currency:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 7001, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  email:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 6060, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  flagd:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8013, "protocol": "tcp", "host_ip": "127.0.0.1"}
+      - {"mode": "ingress", "target": 8016, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  flagd-ui:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 4000, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  fraud-detection:
+    restart: "no"
+  frontend:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8080, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  frontend-proxy:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8080, "published": "8080", "protocol": "tcp", "host_ip": "127.0.0.1"}
+      - {"mode": "ingress", "target": 10000, "published": "10000", "protocol": "tcp", "host_ip": "127.0.0.1"}
+  grafana:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 3000, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  image-provider:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8081, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  jaeger:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 16686, "protocol": "tcp", "host_ip": "127.0.0.1"}
+      - {"mode": "ingress", "target": 4317, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  kafka:
+    restart: "no"
+  load-generator:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8089, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  mcp:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8011, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  opamp-server:
+    restart: "no"
+  opensearch:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 9200, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  otel-collector:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 4317, "protocol": "tcp", "host_ip": "127.0.0.1"}
+      - {"mode": "ingress", "target": 4318, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  payment:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 50051, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  product-catalog:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 3550, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  prometheus:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 9090, "published": "9090", "protocol": "tcp", "host_ip": "127.0.0.1"}
+  quote:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8090, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  recommendation:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 9001, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  shipping:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 50050, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  telemetry-docs:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 8000, "protocol": "tcp", "host_ip": "127.0.0.1"}
+  valkey-cart:
+    restart: "no"
+    ports: !override
+      - {"mode": "ingress", "target": 6379, "protocol": "tcp", "host_ip": "127.0.0.1"}

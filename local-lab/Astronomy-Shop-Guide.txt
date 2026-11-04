@@ -1,0 +1,157 @@
+ASTRONOMY SHOP LOCAL OBSERVABILITY LAB
+Prepared 4 November 2026 (Malaysia time)
+
+INSTALLATION
+Folder: /Users/kengcc/codes/astronomy-shop-llm-monitoring
+Official repository: https://github.com/open-telemetry/opentelemetry-demo
+The installation uses the full shop, local observability stack and agent layer.
+compose.local.yaml limits published ports to this Mac (127.0.0.1), disables
+automatic restarts, and fixes the AI agent to recorded-response mode with a
+non-working loopback LLM endpoint and a dummy key. No cloud exporter is enabled.
+
+START, STOP AND INSPECT
+Open Terminal and run:
+  cd /Users/kengcc/codes/astronomy-shop-llm-monitoring
+  ./lab.sh up -d --pull never --no-build
+  ./lab.sh ps
+  ./lab.sh logs --tail=60 agent otel-collector
+
+Stop while preserving containers and stored data:
+  ./lab.sh stop
+Resume:
+  ./lab.sh start
+Remove this lab's containers/network (without intentionally deleting volumes):
+  ./lab.sh down
+Avoid the upstream `make stop` command if you want to preserve volumes: it uses
+--volumes. Jaeger traces are held in memory and disappear on restart. The guide
+and local configuration remain in the installation folder. Docker images also
+remain after stopping the demo. The demo contains simulated shopping/payment
+services; do not enter real payment or personal information.
+
+LOCAL PAGES
+Shop:       http://localhost:8080/
+AI chatbot: http://localhost:8080/chatbot/
+Traces:     http://localhost:8080/jaeger/ui/
+Dashboards: http://localhost:8080/grafana/
+Load tests: http://localhost:8080/loadgen/
+Flags:      http://localhost:8080/feature/
+
+AI DEMO: FREE RECORDED RESPONSES
+Try these exact prompts, preferably in a fresh conversation:
+  Show all available products in the store.
+  What currencies are supported by the Astronomy Shop?
+  What current promotions are available on binoculars?
+The LangGraph agent runs, invokes shop tools and emits telemetry, while its LLM
+responses are replayed from upstream fixtures. This is not unrestricted live
+model inference. Unrecorded prompts display an explanation with instructions to use a sample.
+The page labels its recorded mode. Each request uses fresh agent history so a
+failed question does not prevent a subsequent sample from working.
+This local UI adjustment is mounted from local-lab/chat_interface.py; its
+LAB_REPLAY_MODE setting should be disabled if a live model is connected later. The configured loopback endpoint
+prevents an unmatched prompt from reaching a paid model API. Recorded fixtures
+can lack token-usage fields; do not treat this setup as a real cost or answer-
+quality evaluation. A live local model or a paid model needs separate setup.
+Use Jaeger to search service `agent` and open a recent trace; look for the
+astronomy_shop_agent_workflow and related tool/model calls.
+
+MAC AND DOCKER CHECKS
+Apple M3 Max, 14 CPU cores, 36 GB RAM; approximately 277 GiB free before downloads.
+Git 2.56.0; Docker CLI 29.8.2; Compose 5.5.1. Docker exposes 14 cores and roughly
+7.65 GiB RAM to its Linux VM. The full demo's memory limits total about 9.5 GiB;
+these are ceilings, not measured consumption. If services are killed for memory,
+raise Docker Desktop Settings > Resources > Memory to 12 GiB and apply, then
+start the lab again. This was not changed automatically.
+Native linux/arm64 images are selected explicitly. See Verification.txt for the
+actual image inventory and runtime results. No Linux VM beyond Docker's own VM
+is needed. All 31 services were verified running after raising product-catalog from its
+upstream 20 MB limit to 128 MB following an observed memory-limit kill.
+The latest demo tags are mutable; verification records the source
+commit and the exact loaded image IDs. Do not pull updates blindly if you need
+a repeatable comparison.
+
+PUBLIC IMAGE DOWNLOAD WORKAROUND
+Docker's direct GHCR downloads returned 403/denied. Public registry access from
+the Mac itself worked. Official images were downloaded for linux/arm64 with
+Google's crane utility and loaded with docker load. Your existing registry login
+was left intact. Once images are loaded, lab.sh up --pull never --no-build avoids
+that registry issue. The downloader and transfer cache are installation-time
+scratch files, not required to run the demo.
+
+LATER: CONNECT ONE CLOUD PLATFORM AT A TIME
+The cloud-templates folder contains INACTIVE examples. None is mounted or loaded.
+Before enabling one, explicitly approve the account/region, ingestion scope,
+budget and any trial terms. This demo generates traffic continuously, so cloud
+usage can grow even while no browser is open. Stop load generation when idle:
+  ./lab.sh stop load-generator
+Start it for a controlled evaluation window:
+  ./lab.sh start load-generator
+Use equivalent test durations and traffic when comparing vendors.
+
+All services already export to the local OpenTelemetry Collector. Cloud setup
+adds exporters there; rebuilding the application should not be necessary for
+basic OTLP ingestion. Vendor AI monitoring, evaluations and cost reporting can
+require extra instrumentation or product-specific setup. Basic trace export
+does not prove those features work.
+
+Activation procedure (perform later, after approval):
+1. Back up src/otel-collector/otelcol-config-extras.yml.
+2. Copy ONE selected template into that file. Keep local exporters listed in
+   the template: Collector config merging replaces arrays rather than appending.
+3. Pass required variables to the otel-collector container through an explicit
+   local Compose env_file entry. A host variable or .env.override alone is not
+   automatically forwarded to the container. Keep credentials in an untracked
+   file, chmod 600 it and exclude it in .git/info/exclude. Never put cloud keys
+   in the frontend/browser environment.
+   Example addition to compose.local.yaml under services.otel-collector:
+     env_file:
+       - .cloud-secrets.env
+4. Validate the merged Collector configuration before restarting. Then run:
+     ./lab.sh up -d --pull never --no-build otel-collector
+5. Inspect Collector logs for authentication, export and rate-limit errors;
+   confirm agent and shop traces arrive in the vendor dashboard, and check the
+   vendor's usage/billing view. Cloud authentication/ingestion was NOT tested
+   during this local installation.
+6. To disconnect, restore the empty extras file and remove the cloud env_file
+   entry, then recreate the Collector. Stop the load generator outside tests.
+
+DATADOG
+Template: cloud-templates/datadog.yaml
+Container variables: DD_SITE and DD_API_KEY.
+Choose your account site (for example datadoghq.com or datadoghq.eu) and an API
+key authorized for that account. The template uses the Datadog exporter and
+connector, with a separate connector-to-Datadog metrics pipeline for APM metrics.
+It retains Jaeger, Prometheus and OpenSearch. This uses the existing contrib
+Collector; it does not install a Datadog Agent. See official setup and feature
+requirements before comparing host monitoring or LLM Observability.
+https://docs.datadoghq.com/opentelemetry/setup/collector_exporter/datadog_exporter/
+
+NEW RELIC
+Template: cloud-templates/newrelic.yaml
+Container variables: NEW_RELIC_OTLP_ENDPOINT and NEW_RELIC_LICENSE_KEY.
+Use your account's regional endpoint, e.g. https://otlp.nr-data.net:443 (US) or
+https://otlp.eu01.nr-data.net:443 (EU). The license/ingest key goes in the api-key
+header. The exporter uses OTLP over HTTP with TLS for traces, metrics and logs.
+New Relic accepts cumulative metrics; delta temporality and exponential
+histograms are recommended for a fuller evaluation. Tune batching to its
+payload limits and check NrIntegrationError after enabling ingestion.
+https://docs.newrelic.com/docs/opentelemetry/best-practices/opentelemetry-otlp/
+
+GRAFANA CLOUD
+Template: cloud-templates/grafana-cloud.yaml
+Container variables: GRAFANA_OTLP_ENDPOINT and GRAFANA_OTLP_AUTHORIZATION.
+Open your stack's OpenTelemetry connection tile, select the upstream Collector
+instructions and copy the exact OTLP gateway endpoint and authentication header.
+GRAFANA_OTLP_AUTHORIZATION is the full `Basic <base64 credentials>` value, not
+an ordinary Grafana login password. Ensure the token has the needed ingest
+permissions. Keep the endpoint's /otlp suffix if the portal provides it. The
+local Grafana dashboard is separate from Grafana Cloud.
+https://grafana.com/docs/grafana-cloud/send-data/otlp/send-data-otlp/
+
+OFFICIAL DEMO REFERENCES
+https://opentelemetry.io/docs/demo/docker-deployment/
+https://github.com/open-telemetry/opentelemetry-demo/blob/main/src/agent/README.md
+https://github.com/google/go-containerregistry/tree/main/cmd/crane
+
+VERIFICATION SUMMARY
+31 ARM64 services running; all four pages rendered; three agent prompts passed;
+5 agent traces / 99 spans retrieved. See Verification.txt for full results.
